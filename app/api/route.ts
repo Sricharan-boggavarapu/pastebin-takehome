@@ -53,17 +53,21 @@ export async function GET(req: Request) {
     return new Response("Paste expired", { status: 410 });
   }
 
-  if (paste.maxViews && paste.views >= paste.maxViews) {
+  const newViews = paste.views + 1;
+
+  if (paste.maxViews && newViews > paste.maxViews) {
     return new Response("View limit reached", { status: 410 });
   }
 
   await prisma.paste.update({
     where: { id },
-    data: { views: paste.views + 1 },
+    data: { views: newViews },
   });
 
-  return Response.json({
-    content: paste.content,
-    views: paste.views + 1,
-  });
+  return new Response(
+    `${paste.content}\n\nViews: ${newViews}`,
+    {
+      headers: { "Content-Type": "text/plain" },
+    }
+  );
 }
