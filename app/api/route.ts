@@ -23,7 +23,8 @@ export async function POST(req: Request) {
       id,
       content,
       expireAt,
-      maxViews: expire_after_views ?? null,
+      // default max views = 5
+      maxViews: expire_after_views ?? 5,
     },
   });
 
@@ -49,12 +50,14 @@ export async function GET(req: Request) {
     return new Response("Paste not found", { status: 404 });
   }
 
+  // expire by time
   if (paste.expireAt && new Date() > paste.expireAt) {
     return new Response("Paste expired", { status: 410 });
   }
 
   const newViews = paste.views + 1;
 
+  // expire by views
   if (paste.maxViews && newViews > paste.maxViews) {
     return new Response("View limit reached", { status: 410 });
   }
